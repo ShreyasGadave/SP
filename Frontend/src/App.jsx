@@ -10,8 +10,8 @@ const App = () => {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(API_URL);
-      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+      const response = await fetch(`${API_URL}/form`);
+      if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}/form`);
       const data = await response.json();
       setUsers(data);
     } catch (error) {
@@ -33,13 +33,13 @@ const App = () => {
     try {
       let response;
       if (editingUser) {
-        response = await fetch(`${API_URL}/${editingUser._id}`, {
+        response = await fetch(`${API_URL}/form/${editingUser._id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ Username, Email }),
         });
       } else {
-        response = await fetch(API_URL, {
+        response = await fetch(`${API_URL}/form`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ Username, Email }),
@@ -60,7 +60,7 @@ const App = () => {
 
   const deleteUser = async (id) => {
     try {
-      const response = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
+      const response = await fetch(`${API_URL}/form/${id}`, { method: "DELETE" });
       if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
       fetchUsers();
     } catch (error) {
