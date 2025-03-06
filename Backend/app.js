@@ -5,7 +5,7 @@ const ConnectDB = require("./ConnectDB"); // Import database connection function
 const User = require("./User"); // Import User model for MongoDB operations
 
 const app = express(); // Initialize Express app
-const Port = 3002; // Define port number
+const PORT = process.env.PORT
 
 // Middleware
 app.use(cors()); // Enable CORS to allow API access from different origins
@@ -14,6 +14,10 @@ app.use(express.json()); // Middleware to parse incoming JSON data
 
 // Connect to MongoDB using environment variable URL
 ConnectDB(process.env.MONGOOSE_URL);
+
+app.get('/',(req,res)=>{
+  res.send('Server is running')
+})
 
 // GET: Fetch all users from the database
 app.get("/form", async (req, res) => {
@@ -68,4 +72,4 @@ app.put("/form/:id", async (req, res) => {
 });
 
 // Start the server and listen on the specified port
-app.listen(Port, () => console.log(`Server running on port ${Port}`));
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

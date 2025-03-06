@@ -6,7 +6,8 @@ const App = () => {
   const [users, setUsers] = useState([]);
   const [editingUser, setEditingUser] = useState(null);
 
-  const API_URL = import.meta.env.VITE_LOCAL_HOST;
+  const API_URL = import.meta.env.VITE_REACT_LOCAL_HOST;
+  ;
 
   const fetchUsers = async () => {
     try {
