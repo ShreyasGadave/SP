@@ -17,9 +17,10 @@ app.use(express.json());
 ConnectDB(process.env.MONGOOSE_URL);
 
 // Routes
-app.use(ErrorRouter)
+app.use(FormRouter); // Use FormRouter for API routes
 
-app.use( FormRouter); // Use FormRouter for /api routes
+// Error Handling Middleware (MUST be last)
+app.use(ErrorRouter);
 
 // Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

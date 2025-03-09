@@ -1,55 +1,69 @@
 const express = require("express");
 const FormRouter = express.Router();
 const User = require("../models/User");
+const upload = require("../models/multerConfig"); // Corrected path
 
+// GET: Retrieve all users
 FormRouter.get("/form", async (req, res) => {
   try {
-    const users = await User.find({}); // Retrieve all users from MongoDB
-    res.json(users); // Send retrieved users as JSON response
+    const users = await User.find({});
+    res.json(users);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" }); // Handle errors
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// POST: Add new user data to the database
-FormRouter.post("/form", async (req, res) => {
+// POST: Add new user with image upload
+FormRouter.post("/form", upload.single("img"), async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ error: "Request body is empty" }); // Return error if request body is empty
+    console.log("Uploaded Image:", req.file); // Log image details
+
+    if (!req.body.Username || !req.body.Email) {
+      return res.status(400).json({ error: "Missing required fields" });
     }
-    await User.create(req.body); // Create a new user document in the database
-    const allUsers = await User.find({}); // Fetch updated list of users
-    res.json(allUsers); // Send updated users list as response
+
+    const newUser = new User({
+      Username: req.body.Username,
+      Email: req.body.Email,
+      img: req.file ? req.file.path : "", // Save image path
+    });
+
+    await newUser.save();
+    res.status(201).json({ message: "User added successfully", user: newUser });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" }); // Handle errors
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
 
-// DELETE: Remove a user from the database using their ID
+// DELETE: Remove user by ID
 FormRouter.delete("/form/:id", async (req, res) => {
   try {
-    const deletedUser = await User.findByIdAndDelete(req.params.id); // Find and delete user by ID
-    if (!deletedUser) return res.status(404).json({ error: "User not found" }); // If user not found, return error
-    const updatedUsers = await User.find({}); // Fetch updated list of users
-    res.json(updatedUsers); // Send updated users list as response
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+    if (!deletedUser) return res.status(404).json({ error: "User not found" });
+
+    res.json({ message: "User deleted successfully", deletedUser });
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" }); // Handle errors
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
-// PUT: Update existing user data using their ID
-FormRouter.put("/form/:id", async (req, res) => {
+// PUT: Update user details (including image)
+FormRouter.put("/form/:id", upload.single("img"), async (req, res) => {
   try {
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ error: "Request body is empty" }); // Return error if request body is empty
+    console.log("Updated Image:", req.file); // Log image details
+
+    const updatedFields = { ...req.body };
+    if (req.file) {
+      updatedFields.img = req.file.path; // Update image if a new one is uploaded
     }
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    }); // Find and update user
-    if (!updatedUser) return res.status(404).json({ error: "User not found" }); // If user not found, return error
-    res.json(updatedUser); // Send updated user data as response
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedFields, { new: true });
+
+    if (!updatedUser) return res.status(404).json({ error: "User not found" });
+
+    res.json(updatedUser);
   } catch (error) {
-    res.status(500).json({ error: "Internal Server Error" }); // Handle errors
+    res.status(500).json({ error: "Internal Server Error", details: error.message });
   }
 });
 
